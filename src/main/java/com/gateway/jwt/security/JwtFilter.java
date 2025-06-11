@@ -29,8 +29,6 @@ public class JwtFilter extends OncePerRequestFilter  {
         @NonNull HttpServletResponse response,
         @NonNull FilterChain filterChain) throws ServletException, IOException {
         HttpServletRequest req = (HttpServletRequest) request;
-        String path = req.getRequestURI();
-
         String pathh = request.getRequestURI();
         System.out.println("➡️ PATH: " + pathh);
 
