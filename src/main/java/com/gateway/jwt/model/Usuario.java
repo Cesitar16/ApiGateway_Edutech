@@ -18,13 +18,16 @@ public class Usuario {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id_usuario")
+    @Column(name = "id_user")
     private Integer idUsuario;
 
-    @Column(name = "nombre_usuario")
+    @Column(name = "username")
     private String nombreUsuario;
 
+    @Column(name = "password")
     private String contrasena;
+
+    @Column(name = "activo")
     private String estado;
     private String rol;
 }

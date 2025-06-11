@@ -1,7 +1,6 @@
-package com.gateway.redireccion.clientes;
+package com.gateway.redireccion.cupones;
 
 import org.springframework.http.HttpHeaders;
-
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
@@ -16,28 +15,29 @@ import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.client.RestTemplate;
 
-import com.gateway.jwt.service.*;
+import com.gateway.jwt.service.JwtService;
+
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 
 @RestController
-@RequestMapping("/api/proxy/clientes")
+@RequestMapping("/api/proxy/cupones")
 @RequiredArgsConstructor
-public class ClientesProxyController {
+public class CuponesProxyController {
 
     private final RestTemplate restTemplate;
     private final JwtService jwtService;
 
     @RequestMapping(value = "/**", method = {RequestMethod.GET, RequestMethod.POST, RequestMethod.PUT, RequestMethod.DELETE})
-    public ResponseEntity<?> proxyProductos(HttpServletRequest request,
-                                            @RequestBody(required = false) String body,
-                                            @RequestHeader HttpHeaders headers) {
+    public ResponseEntity<?> proxyCupones(HttpServletRequest request,
+                                         @RequestBody(required = false) String body,
+                                         @RequestHeader HttpHeaders headers) {
 
-        String originalPath = request.getRequestURI().replace("/api/proxy/clientes", "");
-        String targetUrl = "http://localhost:8086/api/clientes" + originalPath;
+        String originalPath = request.getRequestURI().replace("/api/proxy/cupones", "");
+        String targetUrl = "http://localhost:8002/api/cupones" + originalPath;
         HttpMethod method = HttpMethod.valueOf(request.getMethod());
 
-        // Validar DELETE solo si no es admin
+        // Ejemplo de control de acceso para DELETE, permitiendo solo admin
         if (method == HttpMethod.DELETE) {
             String authHeader = headers.getFirst(HttpHeaders.AUTHORIZATION);
             if (authHeader == null || !authHeader.startsWith("Bearer ")) {
@@ -52,30 +52,11 @@ public class ClientesProxyController {
             if (!"admin".equalsIgnoreCase(rol)) {
                 return ResponseEntity.status(HttpStatus.FORBIDDEN)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .body("{\"error\": \"Solo admin puede eliminar usuarios\"}");
+                        .body("{\"error\": \"Solo admin puede eliminar cupones\"}");
             }
         }
 
-        // Validar PUT solo si no es admin
-        if (method == HttpMethod.PUT) {
-            String authHeader = headers.getFirst(HttpHeaders.AUTHORIZATION);
-            if (authHeader == null || !authHeader.startsWith("Bearer ")) {
-                return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .body("{\"error\": \"Token no presente o inválido\"}");
-            }
-
-            String token = authHeader.replace("Bearer ", "");
-            String rol = jwtService.extractClaim(token, claims -> claims.get("rol", String.class));
-
-            if (!"admin".equalsIgnoreCase(rol)) {
-                return ResponseEntity.status(HttpStatus.FORBIDDEN)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .body("{\"error\": \"Solo admin puede actualizar usuarios\"}");
-            }
-        }
-
-        // Clonar headers válidos
+        // Limpieza y preparación de headers para pasar la llamada
         HttpHeaders cleanHeaders = new HttpHeaders();
         headers.forEach((key, value) -> {
             if (!key.equalsIgnoreCase(HttpHeaders.CONTENT_LENGTH)) {
@@ -86,7 +67,6 @@ public class ClientesProxyController {
 
         HttpEntity<String> entity = new HttpEntity<>(body, cleanHeaders);
 
-        // ⚠️ Capturar errores para mantener JSON y status
         try {
             ResponseEntity<String> response = restTemplate.exchange(targetUrl, method, entity, String.class);
             return ResponseEntity.status(response.getStatusCode())
