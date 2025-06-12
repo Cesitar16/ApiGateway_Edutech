@@ -6,6 +6,7 @@ import com.gateway.jwt.repository.UsuarioRepository;
 import com.gateway.jwt.security.JwtUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.*;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -18,16 +19,16 @@ public class AuthService {
 
     public AuthResponse login(LoginRequest request) {
         authManager.authenticate(
-                new UsernamePasswordAuthenticationToken(request.getNombreUsuario(), request.getContrasena()));
+                new UsernamePasswordAuthenticationToken(request.getUsername(), request.getPassword()));
 
-        Usuario usuario = usuarioRepository.findByNombreUsuario(request.getNombreUsuario())
-                .orElseThrow();
+        Usuario usuario = usuarioRepository.findByUsername(request.getUsername())
+                .orElseThrow(() -> new UsernameNotFoundException("Usuario no encontrado"));
 
-        if (!"activo".equalsIgnoreCase(usuario.getEstado())) {
-            throw new BadCredentialsException("Usuario inactivo");
+        if (!usuario.getActivo()) {
+            throw new IllegalStateException("Usuario inactivo");
         }
 
-        String token = jwtUtil.generateToken(usuario.getNombreUsuario(), usuario.getRol());
-        return new AuthResponse(token, usuario.getNombreUsuario(), usuario.getRol());
+        String token = jwtUtil.generateToken(usuario.getUsername(), usuario.getRol().getNombreRol());
+        return new AuthResponse(token, usuario.getUsername(), usuario.getRol().getNombreRol());
     }
 }

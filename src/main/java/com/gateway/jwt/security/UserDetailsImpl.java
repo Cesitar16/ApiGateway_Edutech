@@ -10,21 +10,21 @@ import java.util.Collections;
 @AllArgsConstructor
 public class UserDetailsImpl implements UserDetails {
 
-    private final Usuario usuario;
+  private final Usuario usuario;
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return Collections.emptyList(); // sin roles por ahora
+        return Collections.emptyList(); // Sin roles por ahora
     }
 
     @Override
     public String getPassword() {
-        return usuario.getContrasena();
+        return usuario.getPassword();
     }
 
     @Override
     public String getUsername() {
-        return usuario.getNombreUsuario();
+        return usuario.getUsername();
     }
 
     @Override
@@ -38,6 +38,6 @@ public class UserDetailsImpl implements UserDetails {
 
     @Override
     public boolean isEnabled() {
-        return "activo".equalsIgnoreCase(usuario.getEstado());
+        return usuario.getActivo(); // Verifica si el usuario está activo
     }
 }
