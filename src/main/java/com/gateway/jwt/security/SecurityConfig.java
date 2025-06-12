@@ -24,17 +24,9 @@ public class SecurityConfig {
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         return http.csrf(csrf -> csrf.disable())
             .authorizeHttpRequests(auth -> auth
-
-                // URL públicas JWT
-                .requestMatchers(HttpMethod.POST, PUBLIC_POST).permitAll() 
-                .requestMatchers(HttpMethod.GET, PUBLIC_GET).permitAll()
-                
-                // Aquí podrías añadir rutas públicas de la API Usuarios, si tienes definidas, ej:
-                // .requestMatchers(HttpMethod.GET, USUARIOS_PUBLIC_GET).permitAll()
-
-                // Otras URL requieren autenticación
-                .anyRequest().authenticated()
-
+                .requestMatchers(HttpMethod.POST, PUBLIC_POST).permitAll() // Rutas públicas POST
+                .requestMatchers(HttpMethod.GET, PUBLIC_GET).permitAll()   // Rutas públicas GET
+                .anyRequest().authenticated() // Todas las demás requieren autenticación
             )
             .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)
             .build();
