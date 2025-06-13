@@ -8,7 +8,7 @@ import lombok.RequiredArgsConstructor;
 import com.gateway.jwt.service.JwtService;
 
 @RestController
-@RequestMapping("/api/proxy/soporte")
+@RequestMapping("/api/proxy/soportes")
 @RequiredArgsConstructor
 public class SoporteProxyController {
 
@@ -20,8 +20,8 @@ public class SoporteProxyController {
                                           @RequestBody(required = false) String body,
                                           @RequestHeader HttpHeaders headers) {
 
-        String originalPath = request.getRequestURI().replace("/api/proxy/soporte", "");
-        String targetUrl = "http://localhost:8007/api/soporte" + originalPath;
+        String originalPath = request.getRequestURI().replace("/api/proxy/soportes", "");
+        String targetUrl = "http://localhost:8007/api/soportes" + originalPath;
         HttpMethod method = HttpMethod.valueOf(request.getMethod());
 
         // Validar DELETE solo para admins
