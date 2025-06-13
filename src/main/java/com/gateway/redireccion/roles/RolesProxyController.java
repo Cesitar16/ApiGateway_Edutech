@@ -38,7 +38,7 @@ public class RolesProxyController {
             String token = authHeader.replace("Bearer ", "");
             String rol = jwtService.extractClaim(token, claims -> claims.get("rol", String.class));
 
-            if (!"admin".equalsIgnoreCase(rol)) {
+            if (!"Administrador".equalsIgnoreCase(rol)) {
                 return ResponseEntity.status(HttpStatus.FORBIDDEN)
                         .contentType(MediaType.APPLICATION_JSON)
                         .body("{\"error\": \"Solo admin puede eliminar roles\"}");
